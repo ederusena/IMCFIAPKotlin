@@ -81,6 +81,20 @@ fun IMCScreen() {
     fun calcularIMC(altura: Double, peso: Double) : Double {
         return peso / (altura / 100).pow(2.0)
     }
+
+    fun determinarClassificacaoIMC(imc : Double): String {
+        return if(imc < 18.5) {
+            "Abaixo do peso"
+        } else if (imc >= 18.5 && imc < 25.0) {
+            "Peso Ideal"
+        } else if (imc >= 25.0 && imc < 30.0) {
+            "Levemente acima do peso"
+        } else if (imc >= 30.0 && imc < 35.0) {
+            "Obesidade Grau I"
+        } else if (imc >= 35.0 && imc < 40.0) {
+            "Obesidade Grau II"
+        } else {"Obesidade Grau III"}
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         // Column 1
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -196,6 +210,7 @@ fun IMCScreen() {
                                           altura = altura.value.toDouble(),
                                           peso = peso.value.toDouble()
                                       )
+                                statusImc.value = determinarClassificacaoIMC(imc.value)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -220,7 +235,7 @@ fun IMCScreen() {
                         .height(200.dp)
                         .align(Alignment.CenterHorizontally)
                         .fillMaxWidth()
-                        .padding(horizontal = 32.dp, vertical = 24.dp),
+                        .padding(horizontal = 3.dp, vertical = 24.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFF329f68)),
                 ) {
@@ -238,7 +253,7 @@ fun IMCScreen() {
                             )
 
                             Text(
-                                text = "Peso Ideal.",
+                                text = statusImc.value,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 fontSize = 20.sp
