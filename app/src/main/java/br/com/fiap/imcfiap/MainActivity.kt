@@ -1,6 +1,11 @@
 package br.com.fiap.imcfiap
 
+import android.app.Activity
+import android.app.Fragment
+import android.content.Context
 import android.os.Bundle
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -28,11 +33,14 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +68,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun IMCScreen() {
     var peso = remember {
@@ -78,23 +87,35 @@ fun IMCScreen() {
         mutableStateOf("")
     }
 
+    var colorCard: MutableState<Color> = remember {
+        mutableStateOf(Color(0xFF329f68))
+    }
     fun calcularIMC(altura: Double, peso: Double) : Double {
         return peso / (altura / 100).pow(2.0)
     }
 
     fun determinarClassificacaoIMC(imc : Double): String {
-        return if(imc < 18.5) {
-            "Abaixo do peso"
+        if(imc < 18.5) {
+            colorCard.value = Color(0xFF329f68)
+            return "Abaixo do peso"
         } else if (imc >= 18.5 && imc < 25.0) {
-            "Peso Ideal"
+            colorCard.value = Color(0xFF329f68)
+            return "Peso Ideal"
         } else if (imc >= 25.0 && imc < 30.0) {
-            "Levemente acima do peso"
+            colorCard.value = Color(0xFFFFEA63)
+            return "Levemente acima do peso"
         } else if (imc >= 30.0 && imc < 35.0) {
-            "Obesidade Grau I"
+            colorCard.value = Color(0xFFF8DA44)
+            return "Obesidade Grau I"
         } else if (imc >= 35.0 && imc < 40.0) {
-            "Obesidade Grau II"
-        } else {"Obesidade Grau III"}
+            colorCard.value = Color(0xFFFD7046)
+            return "Obesidade Grau II"
+        } else {
+            colorCard.value = Color(0xFFF12B2B)
+            return "Obesidade Grau III"
+        }
     }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Column 1
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -204,12 +225,14 @@ fun IMCScreen() {
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
+                        val controller = LocalSoftwareKeyboardController.current
                         Button(
                             onClick = {
                                       imc.value = calcularIMC(
                                           altura = altura.value.toDouble(),
                                           peso = peso.value.toDouble()
                                       )
+                                controller?.hide()
                                 statusImc.value = determinarClassificacaoIMC(imc.value)
                             },
                             modifier = Modifier
@@ -237,7 +260,7 @@ fun IMCScreen() {
                         .fillMaxWidth()
                         .padding(horizontal = 3.dp, vertical = 24.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF329f68)),
+                    colors = CardDefaults.cardColors(containerColor = colorCard.value),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
